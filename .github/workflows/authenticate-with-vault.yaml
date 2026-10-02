@@ -16,7 +16,7 @@ jobs:
         id: vault
         uses: hashicorp/vault-action@v3
         with:
-          url: https://4c3c-86-149-79-251.ngrok-free.app
+          url: https://18e3-86-149-79-251.ngrok-free.app
           method: jwt
           path: github
           role: github-actions
