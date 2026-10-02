@@ -1,0 +1,30 @@
+name: Vault Authentication Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  vault-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Authenticate to Vault
+        id: vault
+        uses: hashicorp/vault-action@v3
+        with:
+          url: https://4c3c-86-149-79-251.ngrok-free.app
+          method: jwt
+          path: github
+          role: github-actions
+          jwtGithubAudience: secrets-vault
+          secrets: |
+            secret/data/github-target password | TARGET_PASSWORD
+
+      - name: Show result
+        run: |
+          echo "Successfully authenticated to Vault"
+          echo "Secret was retrieved."
