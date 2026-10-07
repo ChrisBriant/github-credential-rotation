@@ -1,0 +1,61 @@
+name: Entra Graph Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  entra-test:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Authenticate to Vault and retrieve Entra credential
+        id: vault
+        uses: hashicorp/vault-action@v3
+        with:
+          url: https://welcome-capital-jaybird.ngrok-free.app
+          method: jwt
+          path: github
+          role: github-actions
+          jwtGithubAudience: secrets-vault
+          secrets: |
+            secret/data/entra/d3b5fd90-fc0e-43b5-85be-2f4957996bfb username | ENTRA_CLIENT_ID
+            secret/data/entra/d3b5fd90-fc0e-43b5-85be-2f4957996bfb password | ENTRA_CLIENT_SECRET
+
+      - name: Get Entra access token
+        id: entra
+        shell: bash
+        run: |
+          RESPONSE=$(curl -s -X POST \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "client_id=${ENTRA_CLIENT_ID}" \
+            -d "client_secret=${ENTRA_CLIENT_SECRET}" \
+            -d "scope=https://graph.microsoft.com/.default" \
+            -d "grant_type=client_credentials" \
+            "https://login.microsoftonline.com/${ENTRA_TENANT_ID}/oauth2/v2.0/token")
+
+          ACCESS_TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
+
+          if [ "$ACCESS_TOKEN" = "null" ] || [ -z "$ACCESS_TOKEN" ]; then
+            echo "Failed to obtain Entra access token"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          echo "Successfully obtained Entra access token"
+          echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> "$GITHUB_ENV"
+        env:
+          ENTRA_TENANT_ID: ${{ secrets.ENTRA_TENANT_ID }}
+
+      - name: List Entra users
+        run: |
+          echo "Retrieving users from Microsoft Graph..."
+
+          curl -s \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            "https://graph.microsoft.com/v1.0/users?\$select=id,displayName,userPrincipalName" \
+            | jq .
