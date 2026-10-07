@@ -1,3 +1,4 @@
+```yaml
 name: Entra Graph Test
 
 on:
@@ -26,6 +27,11 @@ jobs:
             secret/data/entra/d3b5fd90-fc0e-43b5-85be-2f4957996bfb username | ENTRA_CLIENT_ID
             secret/data/entra/d3b5fd90-fc0e-43b5-85be-2f4957996bfb password | ENTRA_CLIENT_SECRET
 
+      - name: Debug Vault outputs
+        run: |
+          echo "ENTRA_CLIENT_ID: ${{ steps.vault.outputs.ENTRA_CLIENT_ID }}"
+          echo "ENTRA_CLIENT_SECRET: ${{ steps.vault.outputs.ENTRA_CLIENT_SECRET }}"
+
       - name: Get Entra access token
         id: entra
         shell: bash
@@ -50,6 +56,8 @@ jobs:
           echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> "$GITHUB_ENV"
         env:
           ENTRA_TENANT_ID: ${{ secrets.ENTRA_TENANT_ID }}
+          ENTRA_CLIENT_ID: ${{ steps.vault.outputs.ENTRA_CLIENT_ID }}
+          ENTRA_CLIENT_SECRET: ${{ steps.vault.outputs.ENTRA_CLIENT_SECRET }}
 
       - name: List Entra users
         run: |
@@ -59,3 +67,10 @@ jobs:
             -H "Authorization: Bearer $ACCESS_TOKEN" \
             "https://graph.microsoft.com/v1.0/users?\$select=id,displayName,userPrincipalName" \
             | jq .
+```
+
+The flow is now:
+
+**GitHub OIDC → Vault → retrieve `username`/`password` → expose as `ENTRA_CLIENT_ID`/`ENTRA_CLIENT_SECRET` → authenticate to Entra → obtain Graph token → list users.**
+
+One thing to watch: if the debug output shows the values as `***`, that's GitHub masking them and is actually a good sign. If they're completely empty, we'll know the problem is with the Vault action output/path rather than Entra authentication.
