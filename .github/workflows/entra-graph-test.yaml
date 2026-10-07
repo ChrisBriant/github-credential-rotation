@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Authenticate to Vault and retrieve Entra credential
         id: vault
         uses: hashicorp/vault-action@v3
@@ -23,7 +22,7 @@ jobs:
           role: github-actions
           jwtGithubAudience: secrets-vault
           secrets: |
-            secret/data/entra/d3b5fd90-fc0e-43b5-85be-2f4957996bfb username | ENTRA_CLIENT_ID
+            secret/data/entra/d3b5fd90-fc0e-43b5-85be-2f4957996bfb username | ENTRA_CLIENT_ID;
             secret/data/entra/d3b5fd90-fc0e-43b5-85be-2f4957996bfb password | ENTRA_CLIENT_SECRET
 
       - name: Debug Vault outputs
