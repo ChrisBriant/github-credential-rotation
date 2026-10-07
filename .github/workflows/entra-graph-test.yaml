@@ -1,4 +1,3 @@
-```yaml
 name: Entra Graph Test
 
 on:
@@ -67,10 +66,3 @@ jobs:
             -H "Authorization: Bearer $ACCESS_TOKEN" \
             "https://graph.microsoft.com/v1.0/users?\$select=id,displayName,userPrincipalName" \
             | jq .
-```
-
-The flow is now:
-
-**GitHub OIDC → Vault → retrieve `username`/`password` → expose as `ENTRA_CLIENT_ID`/`ENTRA_CLIENT_SECRET` → authenticate to Entra → obtain Graph token → list users.**
-
-One thing to watch: if the debug output shows the values as `***`, that's GitHub masking them and is actually a good sign. If they're completely empty, we'll know the problem is with the Vault action output/path rather than Entra authentication.
